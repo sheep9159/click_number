@@ -19,29 +19,30 @@ def compare_elements(array1, array2):  # array1和array2大小相同
 
 def phase_locked_matrix(all_channel_eeg):
 
-    """all_channel_eeg的shape例如是32 * 8064，其中32是脑电极，而8064是每个通道下采集的数据"""
+    """all_channel_eeg的shape例如是4 * 32 * 8064，其中4是四种频段，32是32个脑电极数脑电极，而8064是每个通道下采集的数据"""
 
-    channels = all_channel_eeg.shape[0]
-    sampling_number = all_channel_eeg.shape[1]  # 得到输入的通道数和每个通道的采样点数
+    # 得到输入的频段数，电极通道数和每个通道的采样点数
+    bands, channels, points = all_channel_eeg.shape
     eeg_instantaneous_phase = np.zeros_like(all_channel_eeg)  # 初始化每个通道下每个采样点的瞬时相位
 
+    for band, signal_band_eeg in enumerate(all_channel_eeg):
+        for channel, single_channel_eeg in enumerate(signal_band_eeg):
+            analytic_signal = hilbert(single_channel_eeg)
+            instantaneous_phase = np.unwrap(np.angle(analytic_signal))
+            eeg_instantaneous_phase[band, channel] = instantaneous_phase
 
-    for index, single_channel_eeg in enumerate(all_channel_eeg):
-        analytic_signal = hilbert(single_channel_eeg)
-        instantaneous_phase = np.unwrap(np.angle(analytic_signal))
-        eeg_instantaneous_phase[index] = instantaneous_phase
-
-    matrix = np.zeros(shape=[channels, channels])  # 初始化相位锁定矩阵，shape是32 * 32
+    matrix = np.zeros(shape=[bands, channels, channels])  # 初始化相位锁定矩阵，shape是4 * 32 * 32
 
 
-    for i in range(channels):
-        for j in range(channels):
-            if i == j:
-                matrix[i][j] = 1
-            else:
-                matrix[i][j] = np.abs((compare_elements(eeg_instantaneous_phase[i], eeg_instantaneous_phase[j])).sum()) / sampling_number
+    for index in range(bands):
+        for i in range(channels):
+            for j in range(channels):
+                if i == j:
+                    matrix[index][i][j] = 1
+                else:
+                    matrix[index][i][j] = np.abs((compare_elements(eeg_instantaneous_phase[index][i], eeg_instantaneous_phase[index][j])).sum()) / points
 
-    return matrix
+        return matrix
 
 
 if __name__ == '__main__':

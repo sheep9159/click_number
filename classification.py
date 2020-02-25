@@ -3,6 +3,7 @@ import filter
 import torch
 import torch.utils.data
 import torch.nn as nn
+import torchvision.datasets
 import numpy as np
 import pandas as pd
 import os
@@ -32,7 +33,8 @@ class mydatasets(torch.utils.data.Dataset):
     def __getitem__(self, item):
         data = pd.read_csv(self.file_name[item])
         data = data.values[:30, 1:]
-        data = torch.from_numpy(functionConnective.phase_locked_matrix(data)).float().unsqueeze(dim=0)
+        data = filter.get_eeg_signal_four_frequency_band(data)
+        data = torch.from_numpy(functionConnective.phase_locked_matrix(data)).float()
         target = self.targets[item]
 
         return data, target
@@ -47,7 +49,7 @@ class eegnet(nn.Module):
         super(eegnet, self).__init__()
         self.conv1 = nn.Sequential(
             # n = ((in_channels - kernel + 2 * padding) / stride) + 1
-            nn.Conv2d(in_channels=1, out_channels=32, kernel_size=3, stride=3, padding=3),
+            nn.Conv2d(in_channels=4, out_channels=32, kernel_size=3, stride=3, padding=3),
             # nn.BatchNorm2d(32),
             nn.ReLU(),
             nn.MaxPool2d(2)
@@ -79,7 +81,8 @@ class eegnet(nn.Module):
         return res
 
 if __name__ == '__main__':
-    net = eegnet().cuda()
+    net = eegnet()
+    # net = eegnet().cuda()
     datasets = mydatasets(r'D:\Files\SJTU\Study\MME_Lab\Teacher_Lu\click_number\eeg\process1.0', '.csv')
 
     train_datasets, test_datasets = torch.utils.data.random_split(dataset=datasets, lengths=[int(len(datasets)*0.8), len(datasets)-int(len(datasets)*0.8)])
@@ -92,7 +95,7 @@ if __name__ == '__main__':
 
     for epoch in range(3):
         for step, (batch_x, batch_y) in enumerate(train_loader):
-            batch_x, batch_y = batch_x.cuda(), batch_y.cuda()
+            # batch_x, batch_y = batch_x.cuda(), batch_y.cuda()
             pred = net(batch_x)
             loss = loss_func(pred, batch_y)
             optim.zero_grad()
@@ -101,7 +104,7 @@ if __name__ == '__main__':
             if step % 20 == 0:
                 with torch.no_grad():
                     for _, (test_x, test_y) in enumerate(test_loader):
-                        test_x, test_y = test_x.cuda(), test_y.cuda()
+                        # test_x, test_y = test_x.cuda(), test_y.cuda()
                         test_output = net(test_x)
                         accuracy = (torch.argmax(test_output, dim=1) == test_y).float().cpu().numpy().sum() / BATCH_SIZE * 100
                         print('epoch:{} | step:{:4d} | loss:{:0.3f} | acc:{:0.3f}%'.format(epoch, step, loss, accuracy))
