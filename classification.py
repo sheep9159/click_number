@@ -34,6 +34,7 @@ class mydatasets(torch.utils.data.Dataset):
         data = pd.read_csv(self.file_name[item])
         data = data.values[:30, 1:]
         data = filter.get_eeg_signal_four_frequency_band(data)
+        data = data[1:3]
         data = torch.from_numpy(functionConnective.phase_locked_matrix(data)).float()
         target = self.targets[item]
 
@@ -49,24 +50,28 @@ class eegnet(nn.Module):
         super(eegnet, self).__init__()
         self.conv1 = nn.Sequential(
             # n = ((in_channels - kernel + 2 * padding) / stride) + 1
-            nn.Conv2d(in_channels=4, out_channels=32, kernel_size=3, stride=3, padding=3),
-            # nn.BatchNorm2d(32),
+            nn.BatchNorm2d(2),
+            nn.Conv2d(in_channels=2, out_channels=32, kernel_size=3, stride=3, padding=3),
             nn.ReLU(),
-            nn.MaxPool2d(2)
+            nn.MaxPool2d(2),
             # batch_size * 32 * 6 * 6
+            nn.BatchNorm2d(32),
         )
 
         self.conv2 = nn.Sequential(
             nn.Conv2d(32, 64, 3, 3, 3, groups=32),
-            # nn.BatchNorm2d(64),
             nn.ReLU(),
-            nn.MaxPool2d(2)
+            nn.MaxPool2d(2),
             # batch_size * 64 * 2 * 2
+            nn.BatchNorm2d(64),
         )
+
         self.linear01 = nn.Sequential(
+            nn.Dropout(p=0.25),
             nn.Linear(64 * 2 * 2, 64),
-            # nn.BatchNorm1d(64),
+            nn.BatchNorm1d(64),
             nn.ReLU(),
+            nn.Dropout(p=0.25),
             nn.Linear(64, 3),
         )
 
@@ -88,12 +93,12 @@ if __name__ == '__main__':
     train_datasets, test_datasets = torch.utils.data.random_split(dataset=datasets, lengths=[int(len(datasets)*0.8), len(datasets)-int(len(datasets)*0.8)])
 
     train_loader = torch.utils.data.DataLoader(dataset=train_datasets, batch_size=BATCH_SIZE,shuffle=True)
-    test_loader = torch.utils.data.DataLoader(dataset=test_datasets, batch_size=BATCH_SIZE,shuffle=True)
+    test_loader = torch.utils.data.DataLoader(dataset=test_datasets, batch_size=BATCH_SIZE*2,shuffle=True)
 
     loss_func = nn.CrossEntropyLoss()
     optim = torch.optim.Adam(net.parameters(), lr=0.05)
 
-    for epoch in range(3):
+    for epoch in range(5):
         for step, (batch_x, batch_y) in enumerate(train_loader):
             # batch_x, batch_y = batch_x.cuda(), batch_y.cuda()
             pred = net(batch_x)
@@ -106,10 +111,9 @@ if __name__ == '__main__':
                     for _, (test_x, test_y) in enumerate(test_loader):
                         # test_x, test_y = test_x.cuda(), test_y.cuda()
                         test_output = net(test_x)
-                        accuracy = (torch.argmax(test_output, dim=1) == test_y).float().cpu().numpy().sum() / BATCH_SIZE * 100
+                        accuracy = (torch.argmax(test_output, dim=1) == test_y).float().cpu().numpy().sum() / (BATCH_SIZE*2) * 100
                         print('epoch:{} | step:{:4d} | loss:{:0.3f} | acc:{:0.3f}%'.format(epoch, step, loss, accuracy))
                         break
-            # test_x = test_x[:10]
-            # test_output = net(test_x)
-            # pred = torch.argmax(test_output, 1).cpu().data.numpy().squeeze()
-            # print(pred, '\n', test_y[:10])
+
+    # 保存整个模型
+    torch.save(net, r'D:\Files\SJTU\Study\PycharmProjects\click_number\eegnet.pt')

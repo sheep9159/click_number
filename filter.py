@@ -2,7 +2,7 @@ import numpy as np
 import scipy.signal as signal
 
 
-def get_eeg_signal_four_frequency_band(eeg_signal_data, Fs=2000):
+def get_eeg_signal_four_frequency_band(eeg_signal_data, Fs=500):
 
     channels, points = eeg_signal_data.shape
 
