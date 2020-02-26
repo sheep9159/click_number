@@ -75,15 +75,38 @@ for i in range(len(mark_file_name)):  # 逐一对文件夹中的数据进行处�
     for j in range(len(mark) - 1):
         if mark[j+1] != 0:  # 将每个子试验分割开来，子试验间的空隙测量到的脑电信号属无用数据，应删除
             num += 1
-            if (point[j+1] - point[j]) < 250:  # 500hz采样率，则250秒代表反应时间在0.5秒
-                fast_reaction = raw_eeg[:, point[j] : point[j+1]]  # 将脑电信号转换成(35, points)的矩阵
+            # if (point[j+1] - point[j]) < 250:  # 500hz采样率，则250秒代表反应时间在0.5秒
+            #     fast_reaction = raw_eeg[:, point[j] : point[j+1]]  # 将脑电信号转换成(35, points)的矩阵
+            #     df_fast = pd.DataFrame(fast_reaction, index=index)
+            #     df_fast.to_csv(r'D:\Files\SJTU\Study\MME_Lab\Teacher_Lu\click_number\eeg\fast\{}.csv'.format(num))
+            # elif (point[j+1] - point[j]) > 250 & (point[j+1] - point[j]) < 750:
+            #     medium_reaction = raw_eeg[:, point[j] : point[j + 1]]
+            #     df_medium = pd.DataFrame(medium_reaction, index=index)
+            #     df_medium.to_csv(r'D:\Files\SJTU\Study\MME_Lab\Teacher_Lu\click_number\eeg\medium\{}.csv'.format(num))
+            # else:
+            #     slow_reaction = raw_eeg[:, point[j] : point[j + 1]]
+            #     df_slow = pd.DataFrame(slow_reaction, index=index)
+            #     df_slow.to_csv(r'D:\Files\SJTU\Study\MME_Lab\Teacher_Lu\click_number\eeg\slow\{}.csv'.format(num))
+
+            #**************************************重新划分脑电信号*******************************************************#
+
+            if (point[j+1] - point[j]) <= 150:  # 0.3s
+                fast_reaction = raw_eeg[:, point[j] : point[j+1]]
                 df_fast = pd.DataFrame(fast_reaction, index=index)
-                df_fast.to_csv(r'D:\Files\SJTU\Study\MME_Lab\Teacher_Lu\click_number\eeg\fast\{}.csv'.format(num))
-            elif (point[j+1] - point[j]) > 250 & (point[j+1] - point[j]) < 750:
+                df_fast.to_csv(r'D:\Files\SJTU\Study\MME_Lab\Teacher_Lu\click_number\eeg\process2.0\label1\{}.csv'.format(num))
+            elif (point[j+1] - point[j]) > 150 & (point[j+1] - point[j]) <= 300:  # 0.3s-0.6s
                 medium_reaction = raw_eeg[:, point[j] : point[j + 1]]
                 df_medium = pd.DataFrame(medium_reaction, index=index)
-                df_medium.to_csv(r'D:\Files\SJTU\Study\MME_Lab\Teacher_Lu\click_number\eeg\medium\{}.csv'.format(num))
+                df_medium.to_csv(r'D:\Files\SJTU\Study\MME_Lab\Teacher_Lu\click_number\eeg\process2.0\label2\{}.csv'.format(num))
+            elif (point[j+1] - point[j]) > 300 & (point[j+1] - point[j]) <= 450:  # 0.6s-0.9s
+                slow_reaction = raw_eeg[:, point[j] : point[j + 1]]
+                df_slow = pd.DataFrame(slow_reaction, index=index)
+                df_slow.to_csv(r'D:\Files\SJTU\Study\MME_Lab\Teacher_Lu\click_number\eeg\process2.0\label3\{}.csv'.format(num))
+            elif (point[j+1] - point[j]) > 450 & (point[j+1] - point[j]) <= 600:  # 0.9s-1.2s
+                slow_reaction = raw_eeg[:, point[j] : point[j + 1]]
+                df_slow = pd.DataFrame(slow_reaction, index=index)
+                df_slow.to_csv(r'D:\Files\SJTU\Study\MME_Lab\Teacher_Lu\click_number\eeg\process2.0\label4\{}.csv'.format(num))
             else:
                 slow_reaction = raw_eeg[:, point[j] : point[j + 1]]
                 df_slow = pd.DataFrame(slow_reaction, index=index)
-                df_slow.to_csv(r'D:\Files\SJTU\Study\MME_Lab\Teacher_Lu\click_number\eeg\slow\{}.csv'.format(num))
+                df_slow.to_csv(r'D:\Files\SJTU\Study\MME_Lab\Teacher_Lu\click_number\eeg\process2.0\label5\{}.csv'.format(num))

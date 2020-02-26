@@ -20,12 +20,16 @@ class mydatasets(torch.utils.data.Dataset):
         self.targets = []
         for root, dirs, files in os.walk(file_dir, topdown=False):
             for file in files:
-                if root[-4:] == 'fast':
+                if root[-1] == '1':
                     self.targets.append(0)
-                elif root[-4:] == 'medi':
+                elif root[-1] == '2':
                     self.targets.append(1)
-                else:
+                elif root[-1] == '3':
                     self.targets.append(2)
+                elif root[-1] == '4':
+                    self.targets.append(3)
+                else:
+                    self.targets.append(4)
                 if file_type in file:
                     self.file_name.append(os.path.join(root, file))
         self.targets = torch.from_numpy(np.array(self.targets)).long()
@@ -72,7 +76,7 @@ class eegnet(nn.Module):
             nn.BatchNorm1d(64),
             nn.ReLU(),
             nn.Dropout(p=0.25),
-            nn.Linear(64, 3),
+            nn.Linear(64, 5),
         )
 
 
@@ -98,7 +102,7 @@ if __name__ == '__main__':
     loss_func = nn.CrossEntropyLoss()
     optim = torch.optim.Adam(net.parameters(), lr=0.05)
 
-    for epoch in range(5):
+    for epoch in range(3):
         for step, (batch_x, batch_y) in enumerate(train_loader):
             # batch_x, batch_y = batch_x.cuda(), batch_y.cuda()
             pred = net(batch_x)
@@ -111,7 +115,7 @@ if __name__ == '__main__':
                     for _, (test_x, test_y) in enumerate(test_loader):
                         # test_x, test_y = test_x.cuda(), test_y.cuda()
                         test_output = net(test_x)
-                        accuracy = (torch.argmax(test_output, dim=1) == test_y).float().cpu().numpy().sum() / (BATCH_SIZE*2) * 100
+                        accuracy = (torch.argmax(test_output, dim=1) == test_y).float().numpy().sum() / (BATCH_SIZE*2) * 100
                         print('epoch:{} | step:{:4d} | loss:{:0.3f} | acc:{:0.3f}%'.format(epoch, step, loss, accuracy))
                         break
 
