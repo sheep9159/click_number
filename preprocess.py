@@ -51,8 +51,8 @@ def read_eeg_file(file_dir):
     """
     :读取eeg原始数据
     """
-    with open(file_dir, 'rb') as raw:
-        raw = raw.read()
+    with open(file_dir, 'rb') as f:
+        raw = f.read()
         raw_eeg = struct.unpack('{}f'.format(int(len(raw) / 4)), raw)
         raw_eeg = np.array(raw_eeg).reshape((35, -1), order='F')  # 指定每35个数据得到一列
 
@@ -107,19 +107,24 @@ if __name__ == '__main__':
         # 第一次运行的时候用于保存最原始的分割后的数据，没有做任何操作，如去除坏道，去除高频干扰过大的数据
         # pd.DataFrame(raw_eeg, index=index).to_csv(raw_eeg_dir + r'\raw_eeg\{}.csv'.format(i))
 
+        # rest_reference_data = np.mean(raw_eeg[:29, point[1]-round(point[1]*0.7) : round(point[1]*0.7)], axis=1)[:, np.newaxis]  # 求得静息状态下脑电信号的均值
+
         for j in range(len(mark) - 1):
             if mark[j+1] != 0:  # 将每个子试验分割开来，子试验间的空隙测量到的脑电信号属无用数据，应删除
-                data = raw_eeg[:, point[j]: point[j + 1]]  # 将脑电信号转换成(35, points)的矩阵
+                data = raw_eeg[:, point[j]: point[j + 1]]# 将脑电信号转换成(35, points)的矩阵
                 data = data[:29, :]  # 舍去最后一个电极数据，因为实验室的脑电帽这个电极是坏的
                 if get_eeg_is_useful_from_psd(data):
                     zero = np.zeros_like(data)
                     if not (data < zero).any():  # 只要数据当中又负值，则认为存在坏道，应去除
                         num += 1
 
-                        ica = FastICA(n_components=29, max_iter=1000, tol=0.05)
-                        data = ica.fit_transform(data.transpose())
-                        data = data.transpose()
-                        data = preprocessing.scale(data, axis=1)
+                        # data = data - rest_reference_data  # 此时已参考rest_reference_data，去除了个体间幅值差异
+
+                        #*******ICA***********#
+                        # ica = FastICA(n_components=29, max_iter=1000, tol=0.05)
+                        # data = ica.fit_transform(data.transpose())
+                        # data = data.transpose()
+                        # data = preprocessing.scale(data, axis=1)
 
                         if (point[j+1] - point[j]) < 250:  # 500hz采样率，则250代表反应时间在0.5s
                             df_label1 = pd.DataFrame(data, index=index)

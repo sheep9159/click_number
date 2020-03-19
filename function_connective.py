@@ -34,15 +34,15 @@ def phase_locked_matrix(all_bands_eeg):
     matrix = np.zeros(shape=[bands, channels, channels])  # 初始化相位锁定矩阵，shape是4 * 32 * 32
 
 
-    for index in range(bands):
+    for band in range(bands):
         for i in range(channels):
             for j in range(channels):
                 if i == j:
-                    matrix[index][i][j] = 1
+                    matrix[band][i][j] = 1
                 else:
-                    matrix[index][i][j] = np.abs((compare_elements(eeg_instantaneous_phase[index][i], eeg_instantaneous_phase[index][j])).sum()) / points
+                    matrix[band][i][j] = np.abs((compare_elements(eeg_instantaneous_phase[band][i], eeg_instantaneous_phase[band][j])).sum()) / points
 
-        return matrix
+    return matrix
 
 
 if __name__ == '__main__':
