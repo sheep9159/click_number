@@ -3,4 +3,4 @@
 project_dir = r'D:\Files\SJTU\Study\MME_Lab\Teacher_Lu\click_number'
 raw_eeg_dir = r'D:\Files\SJTU\Study\MME_Lab\Teacher_Lu\click_number\eeg\raw_data'
 segmentation_dir = r'D:\Files\SJTU\Study\MME_Lab\Teacher_Lu\click_number\eeg\segmentation'
-features_dir = r'D:\Files\SJTU\Study\MME_Lab\Teacher_Lu\click_number\eeg\features1.0'
+features_dir = r'D:\Files\SJTU\Study\MME_Lab\Teacher_Lu\click_number\eeg\features'

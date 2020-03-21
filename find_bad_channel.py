@@ -41,8 +41,8 @@ if __name__ == '__main__':
         raw_eeg_channel_var_norm = (raw_eeg_channel_var - np.mean(raw_eeg_channel_var)) / np.std(raw_eeg_channel_var)
         raw_eeg_channel_mean_norm = (raw_eeg_channel_mean - np.mean(raw_eeg_channel_mean)) / np.std(raw_eeg_channel_mean)
 
-        var_bad_channel = list(set(np.where(raw_eeg_channel_var_norm > 0.7)[0].tolist() + np.where(raw_eeg_channel_var_norm < -0.7)[0].tolist()))
-        mean_bad_channel = list(set(np.where(raw_eeg_channel_mean_norm < -0.7)[0].tolist() + np.where(raw_eeg_channel_mean_norm > 0.7)[0].tolist()))
+        var_bad_channel = list(set(np.where(raw_eeg_channel_var_norm < -2)[0].tolist() + np.where(raw_eeg_channel_var_norm > 2)[0].tolist()))
+        mean_bad_channel = list(set(np.where(raw_eeg_channel_mean_norm < -2)[0].tolist() + np.where(raw_eeg_channel_mean_norm > 2)[0].tolist()))
         channel_list = [i+1 for i in list(set(var_bad_channel + mean_bad_channel))]
 
         channel_list_str = str(channel_list)
