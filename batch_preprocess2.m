@@ -10,7 +10,7 @@ for n = 1 : length(set_file)
     bad_channel = importdata(['D:\\Files\\SJTU\\Study\\MME_Lab\\Teacher_Lu\\click_number\\eeg\\segmentation\\bad_channel\\', file_name, '.txt']);
     bad_channel = str2num(bad_channel{1});
     pca = 29 - length(bad_channel);
-    if pca < 20
+    if pca < 24
         continue;
     end
     
@@ -24,7 +24,7 @@ for n = 1 : length(set_file)
     EEG = pop_icflag(EEG, [NaN NaN;0.5 1;0.5 1;0.7 1;0.7 1;0.7 1;0 0.4]);
     EEG = eeg_checkset( EEG );
     com = find(EEG.reject.gcompreject);
-    if length(com) > 9
+    if length(com) > 5
         continue;
     end
     EEG = pop_subcomp( EEG, com, 0);

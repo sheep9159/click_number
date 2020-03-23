@@ -29,8 +29,8 @@ def get_file_name(file_dir, file_type):
 
 def read_mark_txt(file_dir):
     """
-    :读取.vhdr文件中mark信息
-    :file_dir: 是.vhdr文件的绝对路径
+    :读取.vmrk文件中mark信息
+    :file_dir: 是.vmrk文件的绝对路径
 
     :返回
     :mark: 点击数字时发送到脑电帽的一个mark标记
